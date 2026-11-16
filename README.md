@@ -5,6 +5,7 @@
 | Nome | RA |
 |---|---|
 | Enzzo Florencio Marin | 823147946 |
+| Gabriel Mendes Camargo de Souza | 8261103620 |
 | Heloisa Soares Ferreira | 824152581 |
 | Igor Reis de Oliveira | 823134761 |
 | João Vitor Cordeiro Lopes | 82429891 |
@@ -12,6 +13,8 @@
 | Kauã Pereira Mendonça e Silva | 823156992 |
 | Matheus Leal Duarte | 823149263 |
 | Mayra Namie Oishi | 823136532 |
+
+
 
 ## Como executar
 
