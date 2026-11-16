@@ -1,0 +1,252 @@
+/* ==========================================================
+   Jogo da Velha — visual "duelo de cores"
+   A página inteira assume a cor do jogador da vez.
+   Todos os pares texto/fundo respeitam contraste >= 4.5:1.
+   ========================================================== */
+:root {
+  --x: #3b2fd9;          /* índigo */
+  --o: #c01f58;          /* framboesa */
+  --draw: #334155;
+  --ink: #0f172a;
+  --tile: #f1f5f9;
+  --win-bg: #bbf7d0;
+  --win-line: #15803d;
+  --win-ink: #14532d;
+  --focus: #fde047;
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font);
+  color: #fff;
+  background-color: var(--bg, var(--x));
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.22), transparent 38%),
+    radial-gradient(circle at 92% 96%, rgba(0, 0, 0, 0.32), transparent 46%);
+  background-attachment: fixed;
+  transition: background-color 0.45s ease;
+}
+body[data-theme="x"] { --bg: var(--x); }
+body[data-theme="o"] { --bg: var(--o); }
+body[data-theme="draw"] { --bg: var(--draw); }
+
+/* ---------- Layout ---------- */
+.app {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  grid-template-areas: "head" "score" "status" "stage" "actions" "hint";
+}
+.head { grid-area: head; }
+.scoreboard { grid-area: score; }
+.status { grid-area: status; }
+.stage { grid-area: stage; }
+.actions { grid-area: actions; }
+.hint { grid-area: hint; }
+
+.head h1 {
+  margin: 0 0 6px;
+  font-family: "Segoe UI Black", "Arial Black", var(--font);
+  font-size: clamp(2.2rem, 10vw, 3.6rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.head p { margin: 0; font-size: 1.05rem; }
+
+/* ---------- Placar ---------- */
+.scoreboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.score {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 10px 4px 12px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.26);
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+.score__icon {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+.score__value { font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.score__label { font-size: 0.85rem; font-weight: 600; }
+/* Jogador da vez: cartão branco com a cor do tema */
+.score.is-active { background: #fff; color: var(--bg); transform: translateY(-4px); }
+
+/* ---------- Status ---------- */
+.status {
+  margin: 0;
+  padding: 12px 20px;
+  justify-self: center;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  background: #fff;
+  border-radius: 999px;
+}
+.status--x { color: var(--x); }
+.status--o { color: var(--o); }
+.status--won { background: var(--win-bg); color: var(--win-ink); }
+.status--draw { background: #e2e8f0; color: var(--ink); }
+
+/* ---------- Tabuleiro ---------- */
+.stage {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 32px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3), 0 4px 0 rgba(0, 0, 0, 0.12);
+}
+.board-area { position: relative; width: 100%; aspect-ratio: 1; }
+.board { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+
+.cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.cell::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 22px;
+  background: var(--tile);
+  box-shadow: inset 0 -5px 0 rgba(15, 23, 42, 0.08);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.board:not(.board--over) .cell--empty:hover::before { background: #e2e8f0; transform: scale(0.96); }
+
+/* Pré-visualização da jogada ao pairar */
+.board[data-turn="X"]:not(.board--over) .cell--empty:hover::after,
+.board[data-turn="O"]:not(.board--over) .cell--empty:hover::after {
+  position: relative;
+  font-size: clamp(2.5rem, 15vw, 4.5rem);
+  opacity: 0.28;
+}
+.board[data-turn="X"]:not(.board--over) .cell--empty:hover::after { content: "X"; color: var(--x); font-weight: 900; }
+.board[data-turn="O"]:not(.board--over) .cell--empty:hover::after { content: "O"; color: var(--o); font-weight: 400; }
+
+/* X e O são desenhados traço a traço (forma + cor, nunca só cor) */
+.cell__svg {
+  position: relative;
+  width: 66%;
+  height: 66%;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 13;
+  pointer-events: none;
+}
+.mark-x, .mark-o { display: none; }
+.cell--x .mark-x, .cell--o .mark-o { display: inline; }
+.mark-x { stroke: var(--x); }
+.mark-o { stroke: var(--o); stroke-width: 11; }
+.mark-x line, .mark-o { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.cell--x .mark-x line { animation: draw 0.28s ease-out backwards; }
+.cell--x .mark-x line:nth-child(2) { animation-delay: 0.14s; }
+.cell--o .mark-o { animation: draw 0.45s ease-out backwards; }
+@keyframes draw { from { stroke-dashoffset: 1; } }
+
+/* Trinca vencedora: casas verdes, selo ✓ e traço riscando o tabuleiro */
+.cell--win::before { background: var(--win-bg); }
+.cell--win::after {
+  content: "✓";
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--win-ink);
+}
+.win-line { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.win-line line {
+  stroke: var(--win-line);
+  stroke-width: 0.1;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.win-line line.is-on {
+  opacity: 0.92;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.5s ease 0.3s;
+}
+.board--over .cell { cursor: default; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  75% { transform: translateX(7px); }
+}
+.shake { animation: shake 0.3s ease-in-out; }
+
+/* ---------- Botões ---------- */
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  flex: 1 1 140px;
+  min-height: 52px;
+  padding: 12px 20px;
+  font: inherit;
+  font-weight: 800;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.05s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: #fff; color: var(--bg); }
+.btn--primary:hover { background: #e2e8f0; }
+.btn--secondary { background: transparent; color: #fff; }
+.btn--secondary:hover { background: rgba(0, 0, 0, 0.25); }
+
+.hint { margin: 0; font-size: 0.9rem; text-align: center; }
+
+/* ---------- Foco por teclado ---------- */
+.btn:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+.cell:focus-visible { outline: 4px solid var(--ink); outline-offset: -8px; border-radius: 26px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Responsividade: 360px → desktop ---------- */
+@media (min-width: 900px) {
+  .app {
+    max-width: 1060px;
+    padding-top: 56px;
+    align-content: start;
+    align-items: start;
+    column-gap: 56px;
+    grid-template-columns: minmax(300px, 1fr) minmax(400px, 540px);
+    grid-template-areas:
+      "head stage"
+      "score stage"
+      "status stage"
+      "actions stage"
+      "hint stage"
+      ".   stage";
+  }
+  .status { justify-self: start; }
+  .hint { text-align: left; }
+}

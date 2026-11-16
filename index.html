@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jogo da Velha</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="x">
+  <main class="app">
+    <header class="head">
+      <h1>Jogo da Velha</h1>
+      <p>Dois jogadores, um tabuleiro. O Jogador X sempre começa.</p>
+    </header>
+
+    <section class="scoreboard" aria-label="Placar da sessão">
+      <div class="score score--x" id="badge-x">
+        <svg class="score__icon" viewBox="0 0 100 100" aria-hidden="true"><path d="M24 24L76 76M76 24L24 76"/></svg>
+        <strong class="score__value" id="score-x">0</strong>
+        <span class="score__label">Vitórias X</span>
+      </div>
+      <div class="score score--draw">
+        <svg class="score__icon" viewBox="0 0 100 100" aria-hidden="true"><path d="M24 38H76M24 62H76"/></svg>
+        <strong class="score__value" id="score-draws">0</strong>
+        <span class="score__label">Empates</span>
+      </div>
+      <div class="score score--o" id="badge-o">
+        <svg class="score__icon" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="28"/></svg>
+        <strong class="score__value" id="score-o">0</strong>
+        <span class="score__label">Vitórias O</span>
+      </div>
+    </section>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+
+    <div class="stage">
+      <div class="board-area">
+        <div id="board" class="board" role="group" aria-label="Tabuleiro do jogo da velha"></div>
+        <svg class="win-line" viewBox="0 0 3 3" aria-hidden="true">
+          <line id="win-line" x1="0" y1="0" x2="0" y2="0" pathLength="1"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="btn-new" class="btn btn--primary">Nova partida</button>
+      <button type="button" id="btn-reset" class="btn btn--secondary">Zerar placar</button>
+    </div>
+
+    <p class="hint">Use Tab para navegar pelas casas e Enter ou Espaço para marcar.</p>
+    <noscript><p class="hint">Este jogo precisa de JavaScript ativado para funcionar.</p></noscript>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
