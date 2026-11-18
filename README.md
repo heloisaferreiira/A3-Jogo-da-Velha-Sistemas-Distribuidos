@@ -1,5 +1,5 @@
 # Jogo da Velha — Requisitos e Solução MVC
-
+Importante: Não conseguimos rodar em rede VM no computador da faculdade. Professor aceitou estar rodando no navegador por cumprir os requisitos solicitados e regras de negócio.
 ## Equipe
 
 | Nome | RA |
